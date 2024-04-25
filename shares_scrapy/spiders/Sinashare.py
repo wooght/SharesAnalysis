@@ -22,6 +22,10 @@ class SinashareSpider(scrapy.Spider):
         """
         爬取所有A股结构
         :名称,代码,证监局分类,地域
+        通过行业获取股票代码:
+        https://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/Market_Center.getHQNodeData?page=1&num=80&sort=symbol&asc=1&node=hangye_ZF51&symbol=&_s_r_a=init
+        通过地域获取股票代码:
+        https://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/Market_Center.getHQNodeData?page=2&num=80&sort=symbol&asc=1&node=diyu_510000&symbol=&_s_r_a=page
         """
         temp_url = "https://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/Market_Center.getHQNodes"
         R = scrapy.Request(temp_url, callback=self.temp_parse)
