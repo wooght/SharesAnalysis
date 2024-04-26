@@ -4,7 +4,7 @@
 @file       :areas_story.py
 @Author     :wooght
 @Date       :2024/4/25 21:15
-@Content    :
+@Content    :地区板块仓库
 """
 from ..table import *
 

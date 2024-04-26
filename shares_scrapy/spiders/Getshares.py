@@ -20,12 +20,11 @@ class GetSharesSpider(scrapy.Spider):
         重写构造函数
         :param target:  spider传参数,area指通过地域查询,csrc指通过行业查询
             传参命令:scrapy crawl get_shares -a target=csrc
-        :param args:
-        :param kwargs:
+        :param args:    父类参数
+        :param kwargs:  父类参数
         """
         super(GetSharesSpider, self).__init__(*args, **kwargs)
         self.target = target
-        print(self.all_target[target])
 
     def parse(self, response, *args, **kwargs):
         """
@@ -33,34 +32,33 @@ class GetSharesSpider(scrapy.Spider):
         :param response:
         :param args:
         :param kwargs:
-        :return:
         """
-        nums_url = ('https://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/Market_Center'
+        count_url = ('https://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/Market_Center'
                     '.getHQNodeStockCount?node={}')
         for row in self.all_target[self.target].values():
             # 组装获取股票数量地址
-            now_url = nums_url.format(row['code'])
-            yield Request(url=now_url, callback=self.nums_parse, meta={'code': row['code'], 'id': row['id']})
+            now_url = count_url.format(row['code'])
+            yield Request(url=now_url, callback=self.parse_count, meta={'code': row['code'], 'id': row['id']})
 
-    def nums_parse(self, response):
+    def parse_count(self, response):
         """
         获取股票数量,组装获取股票信息地址
         :param response: meta['code'','id'] code:要查询的地域或者行业code,id为对应的本系统id
-        :return:
         """
         code = response.meta.get("code")
         target_id = response.meta.get('id')
+        result_json = json.loads(response.body)
+        if len(result_json) <= 0: yield None
         pages = int(json.loads(response.body)) // 80
         for page in range(1, pages + 2):
             now_url = self.url_model.format(page, code)
-            yield Request(url=now_url, callback=self.get_parse if self.target == 'area' else self.update_parse,
+            yield Request(url=now_url, callback=self.parse_gain if self.target == 'area' else self.parse_update,
                           meta={'id': target_id})
 
-    def get_parse(self, response):
+    def parse_gain(self, response):
         """
         通过地域获取每支股票基础信息
         :param response: meta['id'] 为area_id
-        :return:
         """
         item = SharesItem()
         data = json.loads(response.body)
@@ -82,11 +80,10 @@ class GetSharesSpider(scrapy.Spider):
 
             yield item
 
-    def update_parse(self, response):
+    def parse_update(self, response):
         """
         修改股票证监会行业分类
         :param response: meta['id'] 为csrc_id
-        :return:
         """
         csrc_id = response.meta.get('id')
         all_data = json.loads(response.body)
