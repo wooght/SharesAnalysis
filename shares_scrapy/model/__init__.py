@@ -7,4 +7,6 @@
 @Content    :
 """
 from . import table as T
-from .repository import areas
+from .repository import areas_story
+from .repository import csrcs_story
+from .repository import shares_story

@@ -1,7 +1,7 @@
 # -- coding: utf-8 -
 """
 @project    :shares_scrapy
-@file       :areas.py
+@file       :areas_story.py
 @Author     :wooght
 @Date       :2024/4/25 21:15
 @Content    :
@@ -9,7 +9,7 @@
 from ..table import *
 
 
-def all():
+def all_areas():
     s = area.select()
     r = connect.execute(s)
     all_area = r.fetchall()
