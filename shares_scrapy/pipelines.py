@@ -1,10 +1,11 @@
-# Define your item pipelines here
-#
-# Don't forget to add your pipeline to the ITEM_PIPELINES setting
-# See: https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-
-
-# useful for handling different item types with a single interface
+# -- coding: utf-8 -
+"""
+@project    :shares_scrapy
+@file       :pipelines.py
+@Author     :wooght
+@Date       :2024/4/26 15:42
+@Content    :spider流程控制模块 管道功能, 数据处理
+"""
 from itemadapter import ItemAdapter
 from shares_scrapy.items import AreaItem, Csrcclassify, SharesItem
 from shares_scrapy.model import T, areas_story, csrcs_story, shares_story

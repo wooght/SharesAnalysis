@@ -41,16 +41,16 @@ DEFAULT_REQUEST_HEADERS = {
    "Accept-Language": "en",
 }
 
-# Enable or disable spider middlewares
+# Enable or disable spider wmiddlewares
 # See https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 #SPIDER_MIDDLEWARES = {
-#    "shares_scrapy.middlewares.SharesScrapySpiderMiddleware": 543,
+#    "shares_scrapy.wmiddlewares.SharesScrapySpiderMiddleware": 543,
 #}
 
-# Enable or disable downloader middlewares
+# Enable or disable downloader wmiddlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
-   "shares_scrapy.middlewares.SharesScrapyDownloaderMiddleware": 543,
+   "shares_scrapy.wmiddlewares.SharesScrapyDownloaderMiddleware": 543,
 }
 
 # Enable or disable extensions
@@ -76,7 +76,7 @@ ITEM_PIPELINES = {
 # each remote server
 #AUTOTHROTTLE_TARGET_CONCURRENCY = 1.0
 # Enable showing throttling stats for every response received:
-#AUTOTHROTTLE_DEBUG = False
+AUTOTHROTTLE_DEBUG = False
 
 # Enable and configure HTTP caching (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html#httpcache-middleware-settings

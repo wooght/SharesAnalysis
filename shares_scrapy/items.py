@@ -1,7 +1,11 @@
-# Define here the models for your scraped items
-#
-# See documentation in:
-# https://docs.scrapy.org/en/latest/topics/items.html
+# -- coding: utf-8 -
+"""
+@project    :shares_scrapy
+@file       :items.py
+@Author     :wooght
+@Date       :2024/4/26 15:42
+@Content    :数据定义,项目模型定义
+"""
 
 import scrapy
 
