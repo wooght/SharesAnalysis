@@ -7,7 +7,7 @@
 @Content    :spider流程控制模块 管道功能, 数据处理
 """
 from itemadapter import ItemAdapter
-from shares_scrapy.items import AreaItem, Csrcclassify, SharesItem
+from shares_scrapy.items import AreaItem, Csrcclassify, SharesItem, MarketItem
 from shares_scrapy.model import T, areas_story, csrcs_story, shares_story
 from shares_scrapy.common.echo import echo
 
@@ -55,6 +55,16 @@ class SharesScrapyPipeline:
             if item['code'] in self.shares_code: return item
             i = T.shares.insert()
             r = T.connect.execute(i, dict(item))
+            T.connect.commit()
+        elif isinstance(item, MarketItem):
+            """
+                股票行情日K
+            """
+            i = T.market.insert()
+            r = T.connect.execute(i, dict(item))
+            T.connect.commit()
+            echo(str(item.code)+': 保存成功!')
+
         return item
 
     def close_spider(self, spider):

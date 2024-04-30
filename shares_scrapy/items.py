@@ -62,3 +62,19 @@ class SharesItem(scrapy.Item):
     mktcap = scrapy.Field()         # 总市值
     nmc = scrapy.Field()            # 流通值
     pb = scrapy.Field()             # 市净率
+
+
+class MarketItem(scrapy.Item):
+    """
+        股票行情日K
+    """
+    id = scrapy.Field()
+    code = scrapy.Field()
+    share_id = scrapy.Field()
+    high = scrapy.Field()
+    low = scrapy.Field()
+    open = scrapy.Field()
+    close = scrapy.Field()
+    amount = scrapy.Field()
+    volume = scrapy.Field()
+    date = scrapy.Field()

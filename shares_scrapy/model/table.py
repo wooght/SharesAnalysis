@@ -8,7 +8,7 @@
 """
 
 from ..common.SecretCode import Wst
-from sqlalchemy import Integer, String, Float, Date
+from sqlalchemy import Integer, String, Float, Date, select, func
 from sqlalchemy import create_engine, Table, Column, MetaData
 
 host = '127.0.0.1'
@@ -85,7 +85,7 @@ create table if not exists shares (
 """
 market = Table("market", metadata,
                Column('id', Integer(), primary_key=True, autoincrement=True),
-               Column('symbol', String()),
+               Column('share_id', Integer()),
                Column('code', String()),
                Column("high", Float()),
                Column("low", Float()),
@@ -99,14 +99,14 @@ market = Table("market", metadata,
 create table if not exists market(
     id int primary key auto_increment,
     code varchar(16),
-    symbol varchar(32),
+    share_id int(4),
     high float(16),
     low float(16),
     open float(16),
     close float(16),
     amount float(32),
     volume float(32),
-    datetime date
+    date date
 )
 """
 

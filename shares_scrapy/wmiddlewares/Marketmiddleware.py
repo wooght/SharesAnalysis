@@ -11,8 +11,10 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
-import time, re
+import time, random
 from shares_scrapy.common.echo import echo
+from shares_scrapy.common.w_re import CleanData
+import json
 
 
 class Marketmiddleware(object):
@@ -22,6 +24,7 @@ class Marketmiddleware(object):
     body = ''  # response 返回内容
     webdriver = webdriver
     handles = []
+    total_crawl = 0
 
     def __init__(self):
         if self.headless:
@@ -45,19 +48,32 @@ class Marketmiddleware(object):
         self.handles.append(self.driver.current_window_handle)
 
     def process_request(self, request, spider):
-        time.sleep(2)
-        self.driver.switch_to.window(self.handles[-1])          # 切换到最后一个handle
+        self.total_crawl += 1
+        # 第二个handle获取数据
+        time.sleep(random.randint(25, 60))
+        if self.total_crawl % 10 == 0:
+            echo('每10次停留2分钟')
+            time.sleep(120)
+        echo(request.url+'开始')
+        self.driver.switch_to.window(self.driver.window_handles[1])             # 切换到最后一个handle
         self.driver.get(request.url)
-        compress_data = self.driver.page_source                 # 获取压缩JS文件
+        compress_data = CleanData(self.driver.page_source)                      # 获取压缩JS文件
 
-        just_data = self.compress_split(compress_data)
-        load_js = self.get_js('sina_h5k.js')
-        load_js.replace('{compress}', just_data[1])
+        # 清洗数据
+        compress_data.delete_html()
+        compress_data.to_compress()
+        just_data = compress_data.result_string.split('"')
 
-        compress_data = self.driver.execute_script(load_js)
-        time.sleep(1)
-        echo(compress_data)
-        return HtmlResponse(body=compress_data, encoding='utf-8', request=request, url=str(self.url))
+        # 组装JS
+        load_js = self.get_js('sina_h5k.js')                                    # 获取要执行的JS
+        new_js = load_js.replace('{compress}', just_data[1])
+
+        # 回到第一个handle执行JS函数
+        self.driver.switch_to.window(self.driver.window_handles[0])             # 切换会第二个handles
+        stack_data = self.driver.execute_script(new_js)                      # 在源文件中执行JS
+        json_str = json.dumps(stack_data)
+        return HtmlResponse(body=json_str, encoding='utf-8', request=request,
+                            url=str(self.url))
 
     def process_spider_closed(self, spider, reason):
         echo("执行关闭driver")
@@ -68,11 +84,3 @@ class Marketmiddleware(object):
         with open('E:/wooght-server/scripy_wooght//shares_scrapy/shares_scrapy/wmiddlewares/js/'+str(js_name), 'r') as file:
             js_code = file.read()
         return js_code
-
-    def compress_split(self, data):
-        clean = re.compile('<.*?>')
-        text = re.sub(clean, '', data)
-        new_data = text.replace(' ', '')
-        new_data = new_data.replace('\n', '')
-        just_data = new_data.split('"')
-        return just_data
