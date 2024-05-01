@@ -25,12 +25,16 @@ CONCURRENT_REQUESTS = 32
 # 同一网站延迟时间
 DOWNLOAD_DELAY = 2
 # 同个域并发量
-CONCURRENT_REQUESTS_PER_DOMAIN = 4
+CONCURRENT_REQUESTS_PER_DOMAIN = 1      # 设置为1 可以理解为顺序进行
 # 同IP并发量
 CONCURRENT_REQUESTS_PER_IP = 2
 
 # 是否启动cookie 引擎
 COOKIES_ENABLED = True
+
+# 日志级别  ERROR/WARNING/CRITICAL
+LOG_LEVEL = "ERROR"
+LOG_ENABLED = True
 
 # Disable Telnet Console (enabled by default)
 #TELNETCONSOLE_ENABLED = False
@@ -38,9 +42,10 @@ COOKIES_ENABLED = True
 # 默认请求request headers
 DEFAULT_REQUEST_HEADERS = {
    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-   "Accept-Language": "en",
+   "Accept-Language": "zh-Hans-CN;q=1",
+   "User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 Edg/122.0.0.0",
+   "Connection": "keep-alive",
 }
-
 #
 
 # Enable or disable spider wmiddlewares

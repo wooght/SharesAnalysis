@@ -19,6 +19,7 @@ def group_code():
     result_list = []
     for row in r.fetchall():
         result_list.append(row.code)
+    return result_list
 
 
 def share_market(share_id):

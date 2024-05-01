@@ -75,6 +75,11 @@ class DateTimeMath:
         return self.str_to_struct(target_date)
 
     def str_to_struct(self, str_date):
+        """
+        返回时间结构
+        :param str_date: 输入时间格式 2020-10-10 10:10:10
+        :return: 时间结构
+        """
         t_model = self.datetime_model if len(str_date) > 10 else self.date_model
         time_struct = time.strptime(str_date, t_model)
         return time_struct
@@ -95,6 +100,13 @@ class DateTimeMath:
         random_num = random.randint(1, num)
         time.sleep(random_num)
         return random_num
+
+    def real_time(self):
+        """
+        返回实时时间
+        :return: %H:%M:%S
+        """
+        return time.strftime(self.time_model, time.localtime())
 
 
 WDate = DateTimeMath()

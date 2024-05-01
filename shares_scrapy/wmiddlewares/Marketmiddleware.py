@@ -12,7 +12,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 import time, random
-from shares_scrapy.common.echo import echo
+from shares_scrapy.common.echo import echo, echo_info
 from shares_scrapy.common.w_re import CleanData
 import json
 
@@ -34,13 +34,14 @@ class Marketmiddleware(object):
         self.options.add_argument("--window-size=1600,900")  # 窗口大小
         self.options.add_argument("--no-sandbox")  # 沙盒模式
         self.options.add_argument('blink-settings=imagesEnabled=false')  # 不加载图片
+        self.options.add_argument('log-level=3')    # 设置日志级别   INFO:0,WARNING:1,LOG_ERROR:2,LOG_FATAL:3
         prefs = {
             'profile.default_content_settings.popups': 0,  # 禁止弹出下载窗口
             'download.default_directory': 'downfile',  # 下载目录
         }
         self.options.add_experimental_option('prefs', prefs)
         self.driver = self.webdriver.Chrome(options=self.options)  # 启动chromedriver
-        echo('打开默认网址:')
+        echo('打开默认网址')
         self.driver.get('https://finance.sina.com.cn/realstock/company/sz002594/nc.shtml')
         self.handles.append(self.driver.current_window_handle)
         self.driver.implicitly_wait(3)
@@ -52,9 +53,9 @@ class Marketmiddleware(object):
         # 第二个handle获取数据
         time.sleep(random.randint(25, 60))
         if self.total_crawl % 10 == 0:
-            echo('每10次停留2分钟')
+            echo_info('downloadmiddleware','每10次停留2分钟')
             time.sleep(120)
-        echo(request.url+'开始')
+        echo_info('downloadmiddleware', 'download->'+request.url)
         self.driver.switch_to.window(self.driver.window_handles[1])             # 切换到最后一个handle
         self.driver.get(request.url)
         compress_data = CleanData(self.driver.page_source)                      # 获取压缩JS文件
@@ -72,6 +73,7 @@ class Marketmiddleware(object):
         self.driver.switch_to.window(self.driver.window_handles[0])             # 切换会第二个handles
         stack_data = self.driver.execute_script(new_js)                      # 在源文件中执行JS
         json_str = json.dumps(stack_data)
+        echo_info('downloadmiddleware', 'download 成功')
         return HtmlResponse(body=json_str, encoding='utf-8', request=request,
                             url=str(self.url))
 

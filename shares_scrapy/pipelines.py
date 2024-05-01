@@ -6,10 +6,12 @@
 @Date       :2024/4/26 15:42
 @Content    :spider流程控制模块 管道功能, 数据处理
 """
+import json
+
 from itemadapter import ItemAdapter
 from shares_scrapy.items import AreaItem, Csrcclassify, SharesItem, MarketItem
 from shares_scrapy.model import T, areas_story, csrcs_story, shares_story
-from shares_scrapy.common.echo import echo
+from shares_scrapy.common.echo import echo, echo_info
 
 
 class SharesScrapyPipeline:
@@ -20,10 +22,10 @@ class SharesScrapyPipeline:
         self.exists_area = all_area.keys()
         self.csrc_parent = {}
         self.shares_code = shares_story.all_code()
-        echo("engine start ok")
+        echo_info('pipeline', '管道初始化')
 
     def open_spider(self, spider):
-        echo('spider: '+spider.name+' -->start ok')
+        echo_info('pipeline', spider.name+' -->启动')
         # 筛选顶级行业分类,供次级分类找到父类ID
         for key, value in self.exists_csrc.items():
             if value['parent_id'] == -1:
@@ -60,10 +62,16 @@ class SharesScrapyPipeline:
             """
                 股票行情日K
             """
+            stack_data = json.loads(item['market'])
+            insert_data = []
+            for row in stack_data:
+                row['share_id'] = item['share_id']
+                row['code'] = item['code']
+                insert_data.append(row)
             i = T.market.insert()
-            r = T.connect.execute(i, dict(item))
+            r = T.connect.execute(i, insert_data)
             T.connect.commit()
-            echo(str(item.code)+': 保存成功!')
+            echo_info('pipeline', str(item['code'])+': 保存'+str(len(insert_data))+'天数据')
 
         return item
 
