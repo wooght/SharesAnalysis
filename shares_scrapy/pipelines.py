@@ -54,7 +54,9 @@ class SharesScrapyPipeline:
             """
                 单个股票基础信息
             """
-            if item['code'] in self.shares_code: return item
+            if item['code'] in self.shares_code:
+                echo_info('重复存在', item['code'])
+                return item
             i = T.shares.insert()
             r = T.connect.execute(i, dict(item))
             T.connect.commit()

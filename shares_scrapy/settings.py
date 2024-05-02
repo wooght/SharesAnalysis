@@ -57,14 +57,16 @@ DEFAULT_REQUEST_HEADERS = {
 # Enable or disable downloader wmiddlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
-   "shares_scrapy.wmiddlewares.SharesScrapyDownloaderMiddleware": 543,
+   "shares_scrapy.middlewares.SharesScrapyDownloaderMiddleware": 543,
 }
 
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html
-#EXTENSIONS = {
-#    "scrapy.extensions.telnet.TelnetConsole": None,
-#}
+# 扩展
+EXTENSIONS = {
+   "scrapy.extensions.telnet.TelnetConsole": None,
+   "shares_scrapy.extensions.ProcessExtension": 300
+}
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html

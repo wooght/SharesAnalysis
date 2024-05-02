@@ -51,10 +51,10 @@ class Marketmiddleware(object):
     def process_request(self, request, spider):
         self.total_crawl += 1
         # 第二个handle获取数据
-        time.sleep(random.randint(25, 60))
+        time.sleep(random.randint(10, 18))
         if self.total_crawl % 10 == 0:
             echo_info('downloadmiddleware','每10次停留2分钟')
-            time.sleep(120)
+            time.sleep(20)
         echo_info('downloadmiddleware', 'download->'+request.url)
         self.driver.switch_to.window(self.driver.window_handles[1])             # 切换到最后一个handle
         self.driver.get(request.url)

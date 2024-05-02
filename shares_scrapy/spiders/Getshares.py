@@ -1,10 +1,18 @@
 # -*- coding: utf-8 -*-
 import json
+from typing import Any
+from typing_extensions import Self
+
 import scrapy
 from scrapy import Request
+from scrapy import signals
+from scrapy.crawler import Crawler
+
 from shares_scrapy.items import SharesItem
-from shares_scrapy.common.echo import echo
+from shares_scrapy.common.echo import echo_info
 from shares_scrapy.model import T, areas_story, csrcs_story
+
+
 
 
 class GetSharesSpider(scrapy.Spider):
@@ -24,6 +32,7 @@ class GetSharesSpider(scrapy.Spider):
         :param kwargs:  父类参数
         """
         super(GetSharesSpider, self).__init__(*args, **kwargs)
+        # super().__init__(*args, **kwargs) 新格式
         self.target = target
 
     def parse(self, response, *args, **kwargs):
@@ -48,7 +57,7 @@ class GetSharesSpider(scrapy.Spider):
         code = response.meta.get("code")
         target_id = response.meta.get('id')
         result_json = json.loads(response.body)
-        if len(result_json) <= 0: yield None
+        if len(result_json) <= 0: return None
         pages = int(json.loads(response.body)) // 80
         for page in range(1, pages + 2):
             now_url = self.url_model.format(page, code)
@@ -90,5 +99,20 @@ class GetSharesSpider(scrapy.Spider):
         for share in all_data:
             share_update = T.shares.update().where(T.shares.c.name == share['name']).values(csrc_id=csrc_id)
             result = T.connect.execute(share_update)
-            print(result.rowcount)
+            echo_info(share['name'], result.rowcount)
+
+    @staticmethod
+    def save_data(sender, item, response, spider):
+        echo_info('spider', '传递数据到item {}'.format(item['code']))
+
+    @staticmethod
+    def spider_error(failure, spider):
+        echo_info('error', '{} error {}'.format(spider.name, failure))
+
+    @classmethod
+    def from_crawler(cls, crawler, *args, **kwargs):
+        spider = super().from_crawler(crawler, *args, **kwargs)
+        crawler.signals.connect(cls.save_data, signals.item_scraped)        # item数据提取信号
+        crawler.signals.connect(cls.spider_error, signals.spider_error)     # 错误信号,如超时,连接错误等
+        return spider
 
