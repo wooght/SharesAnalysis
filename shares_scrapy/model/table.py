@@ -8,7 +8,7 @@
 """
 
 from ..common.SecretCode import Wst
-from sqlalchemy import Integer, String, Float, Date, select, func
+from sqlalchemy import Integer, String, Float, Date, select, func, Boolean
 from sqlalchemy import create_engine, Table, Column, MetaData
 
 host = '127.0.0.1'
@@ -110,3 +110,14 @@ create table if not exists market(
 )
 """
 
+proxy_sitory = Table('proxy_sitory', metadata,
+                     Column('id', Integer(), primary_key=True),
+                     Column('ip', String()),
+                     Column('enabled', Boolean()))
+"""
+create table if not exists proxy_sitory(
+id int primary key auto_increment,
+ip varchar(32),
+enabled boolean
+)engine=Memory;
+"""

@@ -11,3 +11,4 @@ from .repository import areas_story
 from .repository import csrcs_story
 from .repository import shares_story
 from .repository import marketes_story
+from .repository import proxy_sitory

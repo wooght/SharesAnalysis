@@ -4,5 +4,7 @@
     <file url="file://$PROJECT_DIR$/shares_scrapy/common/DateTimeMath.py" charset="GBK" />
     <file url="file://$PROJECT_DIR$/shares_scrapy/common/SecretCode.py" charset="GBK" />
     <file url="file://$PROJECT_DIR$/shares_scrapy/common/echo.py" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/shares_scrapy/model/repository/proxy_sitory.py" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/shares_scrapy/spiders/proxy_89ip.py" charset="GBK" />
   </component>
 </project>
