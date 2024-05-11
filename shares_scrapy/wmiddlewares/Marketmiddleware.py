@@ -7,6 +7,7 @@
 @Content    :行情下载中间件
 """
 from scrapy.http import HtmlResponse
+from scrapy.exceptions import IgnoreRequest, CloseSpider
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.keys import Keys
@@ -19,28 +20,8 @@ from shares_scrapy.model import proxy_sitory
 import random
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support.expected_conditions import presence_of_element_located
-
-ips = """
-121.233.160.219:4246
-183.148.26.2:4225
-123.189.209.1:4261
-115.204.41.16:4276
-117.92.77.17:4248
-42.84.166.64:4213
-111.132.17.22:4230
-125.121.158.247:4214
-117.92.77.38:4215
-180.119.179.233:4213
-110.87.250.133:4245
-113.236.0.98:4296
-42.84.169.20:4213
-123.181.235.109:4227
-1.84.218.53:4243
-42.52.172.157:4231
-58.45.108.131:4247
-114.245.104.148:4225
-"""
-
+sys.path.append('E:\wooght-server\scripy_wooght\shares_scrapy\shares_scrapy')
+from main import get_ips
 class Marketmiddleware(object):
     def __init__(self):
         self.options = Options()
@@ -50,20 +31,30 @@ class Marketmiddleware(object):
         self.webdriver = webdriver
         self.handles = []
         self.total_crawl = 0
-        # self.all_ips = proxy_sitory.all_proxy()
-        self.all_ips = ips.split('\n')
+        self.get_ip_nums = 0
+        self.all_ips = proxy_sitory.all_proxy()
         print(self.all_ips)
         self.now_ip = random.choice(self.all_ips)
         self.ip_status = True
         self.set_options()
 
+
     def get_ip(self):
         i = self.all_ips.index(self.now_ip)
         del self.all_ips[i]
-        # proxy_sitory.set_unenabled(self.now_ip)
-        if len(self.all_ips) < 2:
-            # self.all_ips = proxy_sitory.all_proxy()
-            if len(self.all_ips) == 0: sys.exit()
+        proxy_sitory.set_unenabled(self.now_ip)
+        if len(self.all_ips) <= 3:
+            self.all_ips = proxy_sitory.all_proxy()
+            if len(self.all_ips) <= 5:
+                print('celery异步获取IP')
+                if self.get_ip_nums < 10:
+                    self.get_ip_nums += 1
+                    result = get_ips.delay()
+                    print('异步ID{}'.format(result.id))
+                else:
+                    sys.exit()
+                    # raise CloseSpider('spider closed')
+                    # sys.exit()    # 关闭系统
         self.now_ip = random.choice(self.all_ips)
         self.ip_status = 1
 
@@ -95,6 +86,7 @@ class Marketmiddleware(object):
         if not page:
             self.close_driver()
         elif len(self.driver.page_source) < 100:
+            print('获取内容失败!{}'.format(self.driver.page_source))
             self.close_driver()
         else:
             self.handles.append(self.driver.current_window_handle)
@@ -120,7 +112,7 @@ class Marketmiddleware(object):
         page = self.get_url(request.url)
         if not page:
             self.close_driver()
-            return None
+            raise IgnoreRequest('打开连接失败,proxy ip :{}'.format(self.now_ip))
         compress_data = CleanData(self.driver.page_source)                      # 获取压缩JS文件
 
         # 清洗数据
@@ -152,18 +144,16 @@ class Marketmiddleware(object):
 
 
     def get_url(self, url):
-        print('打开地址:'+url)
+        print('proxyip{}尝试打开地址:{}'.format(self.now_ip,url))
         try:
             self.driver.get(url)
             # WebDriverWait(self.driver, 10).until(presence_of_element_located((By.XPATH, '/html/head/title')))
             # print(self.driver.execute_script("return {httpStatus: document.httpStatus, status: document.status};"))
             return True
-
         except Exception as e:
-            print(f'错误{type(e).__name__}....')
+            print(f'.....错误{type(e).__name__}....')
             print(e)
             return False
-            # print(f'超时-------------------------{type(e).__name__}')
 
 """
     WebDriverException :Message: unknown error: net::ERR_TUNNEL_CONNECTION_FAILED

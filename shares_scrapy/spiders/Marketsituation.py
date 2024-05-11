@@ -37,16 +37,16 @@ class MarketsituationSpider(scrapy.Spider):
     def start_requests(self):
         # @returns requests 0 10
         echo_info('start_request', '开始')
-        # all_shares = shares_story.all_shares()
-        shares_obj = OneShare()
-        share_obj2 = OneShare()
-        shares_obj.id = 5343
-        shares_obj.code = '600588'
-        shares_obj.symbol = 'sh600588'
-        share_obj2.id, share_obj2.code, share_obj2.symbol = 5344, '600657', 'sh600657'
-        all_shares = [share_obj2, shares_obj]
-        # exists_market = marketes_story.group_code() if marketes_story.group_code() else []
-        exists_market = []
+        all_shares = shares_story.all_shares()
+        # shares_obj = OneShare()
+        # share_obj2 = OneShare()
+        # shares_obj.id = 5343
+        # shares_obj.code = '600588'
+        # shares_obj.symbol = 'sh600588'
+        # share_obj2.id, share_obj2.code, share_obj2.symbol = 5344, '600657', 'sh600657'
+        # all_shares = [share_obj2, shares_obj]
+        exists_market = marketes_story.group_code() if marketes_story.group_code() else []
+        # exists_market = []
         print(exists_market)
         for share in all_shares:
             if share.code in exists_market: continue
