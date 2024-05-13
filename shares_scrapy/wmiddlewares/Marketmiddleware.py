@@ -20,8 +20,7 @@ from shares_scrapy.model import proxy_sitory
 import random
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support.expected_conditions import presence_of_element_located
-sys.path.append('E:\wooght-server\scripy_wooght\shares_scrapy\shares_scrapy')
-from main import get_ips
+
 class Marketmiddleware(object):
     def __init__(self):
         self.options = Options()
@@ -48,6 +47,12 @@ class Marketmiddleware(object):
             if len(self.all_ips) <= 5:
                 print('celery异步获取IP')
                 if self.get_ip_nums < 10:
+                    """
+                        怎样排除:  scrapy signal only works in main thread of the main interpreter
+                        另外开启一个全新的线程?
+                    """
+                    sys.path.append('E:\wooght-server\scripy_wooght\shares_scrapy\shares_scrapy')
+                    from main import get_ips
                     self.get_ip_nums += 1
                     result = get_ips.delay()
                     print('异步ID{}'.format(result.id))
@@ -154,9 +159,8 @@ class Marketmiddleware(object):
             print(f'.....错误{type(e).__name__}....')
             print(e)
             return False
-
 """
     WebDriverException :Message: unknown error: net::ERR_TUNNEL_CONNECTION_FAILED
     TimeoutException
-    
+    NoAlertPresentException
 """

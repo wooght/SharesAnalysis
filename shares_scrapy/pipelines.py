@@ -9,8 +9,8 @@
 import json
 
 from itemadapter import ItemAdapter
-from shares_scrapy.items import AreaItem, Csrcclassify, SharesItem, MarketItem
-from shares_scrapy.model import T, areas_story, csrcs_story, shares_story
+from shares_scrapy.items import AreaItem, Csrcclassify, SharesItem, MarketItem, NewsItem
+from shares_scrapy.model import T, areas_story, csrcs_story, shares_story, news_story
 from shares_scrapy.common.echo import echo, echo_info
 
 
@@ -74,10 +74,17 @@ class SharesScrapyPipeline:
             r = T.connect.execute(i, insert_data)
             T.connect.commit()
             echo_info('pipeline', str(item['code'])+': 保存'+str(len(insert_data))+'天数据')
+        elif isinstance(item, NewsItem):
+            """
+                新闻
+            """
+            i = T.news.insert()
+            r = T.connect.execute(i, dict(item))
+            T.connect.commit()
 
         return item
 
     def close_spider(self, spider):
-        echo('spider: '+spider.name + " stop ok")
+        print('spider: '+spider.name + " stop ok")
         T.connect.commit()
         T.connect.close()

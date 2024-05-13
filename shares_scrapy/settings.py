@@ -23,7 +23,9 @@ ROBOTSTXT_OBEY = False
 # 系统并发量
 CONCURRENT_REQUESTS = 32
 # 同一网站延迟时间
-DOWNLOAD_DELAY = 2
+DOWNLOAD_DELAY = 3
+# 自定义随机等待最大时间
+RANDOM_DELAY = 5
 # 同个域并发量
 CONCURRENT_REQUESTS_PER_DOMAIN = 1      # 设置为1 可以理解为顺序进行
 # 同IP并发量
@@ -35,7 +37,7 @@ COOKIES_ENABLED = True
 # 日志级别  ERROR/WARNING/CRITICAL
 LOG_LEVEL = "INFO"
 LOG_ENABLED = True
-LOG_STDOUT = False
+LOG_STDOUT = True
 
 # Disable Telnet Console (enabled by default)
 #TELNETCONSOLE_ENABLED = False

@@ -81,3 +81,10 @@ class MarketItem(scrapy.Item):
     code = scrapy.Field()
     share_id = scrapy.Field()
     market = scrapy.Field()
+
+class NewsItem(scrapy.Item):
+    code = scrapy.Field()
+    text = scrapy.Field()
+    date = scrapy.Field()
+    title = scrapy.Field()
+    url = scrapy.Field()

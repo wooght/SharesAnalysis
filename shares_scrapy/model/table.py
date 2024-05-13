@@ -121,3 +121,22 @@ ip varchar(32),
 enabled boolean
 )engine=Memory;
 """
+
+news = Table('news', metadata,
+             Column('id', Integer(), primary_key=True, autoincrement=True),
+             Column('code', String()),
+             Column('title', String()),
+             Column('text', String()),
+             Column('url',  String()),
+             Column('date', Date())
+             )
+"""
+create table if not exists news(
+id int primary key auto_increment,
+code varchar(32),
+title varchar(64),
+text text,
+url varchar(64),
+date date
+)
+"""

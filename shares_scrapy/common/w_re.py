@@ -31,3 +31,16 @@ class CleanData:
         """
         new_data = self.result_string.replace(' ', '')
         self.result_string = new_data.replace('\n', '')
+
+    @staticmethod
+    def del_html_list(list_str):
+        r = re.compile('<.*?>')
+        result_str = ''
+        for s in list_str:
+            result_str += re.sub(r, '', CleanData.to_compress_static(s))
+        return result_str
+
+    @staticmethod
+    def to_compress_static(text):
+        text = text.replace(' ', '')
+        return text.replace('\n', '')
