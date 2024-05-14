@@ -12,7 +12,7 @@ import scrapy
 from scrapy import Request
 from shares_scrapy.common.echo import echo, echo_info
 import json
-from shares_scrapy.model import T, shares_story, marketes_story
+from shares_scrapy.model import T, shares_story, marketes_story, Wredis
 from shares_scrapy.common.DateTimeMath import WDate
 from shares_scrapy.items import MarketItem
 
@@ -50,6 +50,8 @@ class MarketsituationSpider(scrapy.Spider):
         print(exists_market)
         for share in all_shares:
             if share.code in exists_market: continue
+            if Wredis.get(share.code): continue
+            Wredis.set(share.code, 'Marketsituation')
             yield Request(url=self.url_models.format(share=share.symbol, now_date=self.now_date),
                           errback=self.parse_err,
                           callback=self.parse,

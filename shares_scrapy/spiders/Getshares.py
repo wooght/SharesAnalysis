@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+# 获取股票
+# 根据地域获取股票
+# 根据证监会行业分类股票
+# by wooght
 import json
 from typing import Any
 from typing_extensions import Self
@@ -111,6 +115,15 @@ class GetSharesSpider(scrapy.Spider):
 
     @classmethod
     def from_crawler(cls, crawler, *args, **kwargs):
+        """
+        spider 绑定crawler 信号
+            signals.item_scraped    item被提取/调用
+            signals.spider_error    spider错误发生
+        :param crawler:
+        :param args:
+        :param kwargs:
+        :return:
+        """
         spider = super().from_crawler(crawler, *args, **kwargs)
         crawler.signals.connect(cls.save_data, signals.item_scraped)        # item数据提取信号
         crawler.signals.connect(cls.spider_error, signals.spider_error)     # 错误信号,如超时,连接错误等

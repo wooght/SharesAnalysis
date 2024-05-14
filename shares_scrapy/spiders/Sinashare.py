@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
+# 爬取A股市结构
+# 地域结构,证监会行业结构
+# by wooght
 import json
-from typing import Iterable
 
 import scrapy
 from scrapy import Request

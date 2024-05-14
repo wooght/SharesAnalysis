@@ -32,7 +32,6 @@ class Marketmiddleware(object):
         self.total_crawl = 0
         self.get_ip_nums = 0
         self.all_ips = proxy_sitory.all_proxy()
-        print(self.all_ips)
         self.now_ip = random.choice(self.all_ips)
         self.ip_status = True
         self.set_options()
@@ -42,8 +41,8 @@ class Marketmiddleware(object):
         i = self.all_ips.index(self.now_ip)
         del self.all_ips[i]
         proxy_sitory.set_unenabled(self.now_ip)
+        self.all_ips = proxy_sitory.all_proxy()
         if len(self.all_ips) <= 3:
-            self.all_ips = proxy_sitory.all_proxy()
             if len(self.all_ips) <= 5:
                 print('celery异步获取IP')
                 if self.get_ip_nums < 10:

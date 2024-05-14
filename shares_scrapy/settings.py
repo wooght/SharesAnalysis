@@ -13,10 +13,6 @@ SPIDER_MODULES = ["shares_scrapy.spiders"]
 NEWSPIDER_MODULE = "shares_scrapy.spiders"
 
 
-# Crawl responsibly by identifying yourself (and your website) on the user-agent
-USER_AGENT = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 "
-              "Safari/537.36")
-
 # Obey robots.txt rules 是否遵循robots协议
 ROBOTSTXT_OBEY = False
 
@@ -29,8 +25,11 @@ RANDOM_DELAY = 5
 # 同个域并发量
 CONCURRENT_REQUESTS_PER_DOMAIN = 1      # 设置为1 可以理解为顺序进行
 # 同IP并发量
-CONCURRENT_REQUESTS_PER_IP = 2
-
+CONCURRENT_REQUESTS_PER_IP = 1
+# 下载/访问超时时间 超过这个时间就会报Timeout错误
+DOWNLOAD_TIMEOUT = 10
+# 重试次数
+RETRY_TIMES = 1
 # 是否启动cookie 引擎
 COOKIES_ENABLED = True
 
@@ -42,6 +41,9 @@ LOG_STDOUT = True
 # Disable Telnet Console (enabled by default)
 #TELNETCONSOLE_ENABLED = False
 
+# Crawl responsibly by identifying yourself (and your website) on the user-agent
+USER_AGENT = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 "
+              "Safari/537.36")
 # 默认请求request headers
 DEFAULT_REQUEST_HEADERS = {
    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",

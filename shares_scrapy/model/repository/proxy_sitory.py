@@ -10,6 +10,11 @@
 from ..table import *
 
 def add_proxy(ips):
+    """
+    添加代理IP
+    :param ips:
+    :return:
+    """
     insert_list = []
     exists_ip = all_proxy()
     for ip in ips:
@@ -21,19 +26,45 @@ def add_proxy(ips):
 
 
 def all_proxy():
-    s = proxy_sitory.select().where(proxy_sitory.c.enabled==True)
+    """
+    获取代理IP
+        enabled False 不获取
+        islock True 不获取
+    :return:
+    """
+    s = proxy_sitory.select().filter(proxy_sitory.c.enabled==True, proxy_sitory.c.islock==False)
     r = connect.execute(s)
     return [row.ip for row in r.fetchall()]
 
 
 def delete_ips():
+    """
+        删除无用的IP
+    :return:
+    """
     s = proxy_sitory.delete().where(proxy_sitory.c.enabled==False)
     r = connect.execute(s)
     return r.rowcount
 
 
 def set_unenabled(ip):
+    """
+        将无法访问的IP 设置为 enabled=False
+    :param ip:
+    :return:
+    """
     u = proxy_sitory.update().where(proxy_sitory.c.ip==ip).values(enabled=False)
+    r = connect.execute(u)
+    connect.commit()
+    return r.rowcount
+
+def set_lock(ip):
+    """
+        正在使用的IP上锁
+    :param ip:
+    :return:
+    """
+    u = proxy_sitory.update().where(proxy_sitory.c.ip == ip).values(islock=True)
     r = connect.execute(u)
     connect.commit()
     return r.rowcount

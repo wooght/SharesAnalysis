@@ -22,10 +22,10 @@ class SharesScrapyPipeline:
         self.exists_area = all_area.keys()
         self.csrc_parent = {}
         self.shares_code = shares_story.all_code()
-        echo_info('pipeline', '管道初始化')
+        print('pipeline管道初始化')
 
     def open_spider(self, spider):
-        echo_info('pipeline', spider.name+' -->启动')
+        print('pipeline-->启动spider:{}'.format(spider.name))
         # 筛选顶级行业分类,供次级分类找到父类ID
         for key, value in self.exists_csrc.items():
             if value['parent_id'] == -1:

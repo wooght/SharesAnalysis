@@ -113,7 +113,8 @@ create table if not exists market(
 proxy_sitory = Table('proxy_sitory', metadata,
                      Column('id', Integer(), primary_key=True),
                      Column('ip', String()),
-                     Column('enabled', Boolean()))
+                     Column('enabled', Boolean()),
+                     Column('islock', Boolean()))
 """
 create table if not exists proxy_sitory(
 id int primary key auto_increment,

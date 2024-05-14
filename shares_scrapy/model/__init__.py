@@ -7,6 +7,7 @@
 @Content    :
 """
 from . import table as T
+from .redis_model import Wredis
 from .repository import areas_story
 from .repository import csrcs_story
 from .repository import shares_story
