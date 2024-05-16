@@ -6,14 +6,13 @@
 @Date       :2024/4/25 20:42
 @Content    :获取历史行情日K
 """
-from typing import Iterable
 
 import scrapy
 from scrapy import Request
-from shares_scrapy.common.echo import echo, echo_info
-import json
-from shares_scrapy.model import T, shares_story, marketes_story, Wredis
+from shares_scrapy.common.echo import echo_info
+from shares_scrapy.model import shares_story, marketes_story, Wredis
 from shares_scrapy.common.DateTimeMath import WDate
+from shares_scrapy.run.GetProxy import GetProxy
 from shares_scrapy.items import MarketItem
 
 class OneShare:
@@ -33,6 +32,7 @@ class MarketsituationSpider(scrapy.Spider):
     }
     url_models = 'https://finance.sina.com.cn/realstock/company/{share}/hisdata_klc2/klc_kl.js?d={now_date}'
     now_date = WDate.now_date.replace('-', '_')
+    exists_code = GetProxy('exists_code')
 
     def start_requests(self):
         # @returns requests 0 10
@@ -50,8 +50,7 @@ class MarketsituationSpider(scrapy.Spider):
         print(exists_market)
         for share in all_shares:
             if share.code in exists_market: continue
-            if Wredis.get(share.code): continue
-            Wredis.set(share.code, 'Marketsituation')
+            if self.exists_code.add_ip(share.code): continue
             yield Request(url=self.url_models.format(share=share.symbol, now_date=self.now_date),
                           errback=self.parse_err,
                           callback=self.parse,

@@ -23,4 +23,7 @@ class WooghtRedis:
         except:
             return False
 
+    def member_set(self, arr):
+        pass
+
 Wredis = WooghtRedis()

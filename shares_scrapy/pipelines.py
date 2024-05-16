@@ -87,4 +87,4 @@ class SharesScrapyPipeline:
     def close_spider(self, spider):
         print('spider: '+spider.name + " stop ok")
         T.connect.commit()
-        T.connect.close()
+        # T.connect.close()

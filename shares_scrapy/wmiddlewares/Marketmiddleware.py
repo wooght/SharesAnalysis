@@ -7,21 +7,20 @@
 @Content    :行情下载中间件
 """
 from scrapy.http import HtmlResponse
-from scrapy.exceptions import IgnoreRequest, CloseSpider
+from scrapy.exceptions import IgnoreRequest
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 import time, sys
 from shares_scrapy.common.echo import echo, echo_info
 from shares_scrapy.common.w_re import CleanData
 import json
-from shares_scrapy.model import proxy_sitory
 import random
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support.expected_conditions import presence_of_element_located
+from shares_scrapy.run.GetProxy import GetProxy
 
 class Marketmiddleware(object):
+    proxy_ip = GetProxy('proxy_ips')
+
     def __init__(self):
         self.options = Options()
         self.headless = True  # 无头模式
@@ -31,41 +30,22 @@ class Marketmiddleware(object):
         self.handles = []
         self.total_crawl = 0
         self.get_ip_nums = 0
-        self.all_ips = proxy_sitory.all_proxy()
-        self.now_ip = random.choice(self.all_ips)
+        self.current_ip = ''
         self.ip_status = True
         self.set_options()
 
 
-    def get_ip(self):
-        i = self.all_ips.index(self.now_ip)
-        del self.all_ips[i]
-        proxy_sitory.set_unenabled(self.now_ip)
-        self.all_ips = proxy_sitory.all_proxy()
-        if len(self.all_ips) <= 3:
-            if len(self.all_ips) <= 5:
-                print('celery异步获取IP')
-                if self.get_ip_nums < 10:
-                    """
-                        怎样排除:  scrapy signal only works in main thread of the main interpreter
-                        另外开启一个全新的线程?
-                    """
-                    sys.path.append('E:\wooght-server\scripy_wooght\shares_scrapy\shares_scrapy')
-                    from main import get_ips
-                    self.get_ip_nums += 1
-                    result = get_ips.delay()
-                    print('异步ID{}'.format(result.id))
-                else:
-                    sys.exit()
-                    # raise CloseSpider('spider closed')
-                    # sys.exit()    # 关闭系统
-        self.now_ip = random.choice(self.all_ips)
-        self.ip_status = 1
-
-
     def set_options(self):
-        if not self.ip_status:
-            self.get_ip()
+        """
+        启动webdriver
+        content:
+            设置options
+            设置代理ip
+            启动webdirver并打开默认网页供后续运行JS用
+        :return:
+        """
+        current_ip = self.proxy_ip.get_ip()                             # 获取IP,每启动一次webdriver 就获取一次IP
+        self.current_ip = current_ip if current_ip else sys.exit()      # 如果获取不到代理,退出系统
         if self.headless:
             # 开启无头模式
             self.options.add_argument("--headless")
@@ -80,7 +60,7 @@ class Marketmiddleware(object):
             'download.default_directory': 'downfile',  # 下载目录
         }
         self.options.add_experimental_option('prefs', prefs)
-        proxy_str = '--proxy-server=http://{}'.format(self.now_ip)
+        proxy_str = '--proxy-server=http://{}'.format(self.current_ip)
         self.options.add_argument(proxy_str)         # 设置代理IP
         print('设置成功!'+str(proxy_str))
 
@@ -99,24 +79,37 @@ class Marketmiddleware(object):
             self.handles.append(self.driver.current_window_handle)
 
     def close_driver(self):
-        self.ip_status = False
+        """
+        重启webdriver 入口
+        :return:
+        """
         self.driver.close()
         self.driver.quit()
         self.set_options()
 
     def process_request(self, request, spider):
+        """
+        webdriver 执行爬取操作
+        content:    随机暂停
+                    切换handle
+                    获取内容或者触发异常
+                    获取JS返回内容
+        :param request:
+        :param spider:
+        :return: IgnoreRequest HtmlResponse
+        """
         self.total_crawl += 1
         # 第二个handle获取数据
-        time.sleep(random.randint(2, 5))
+        time.sleep(random.randint(2, 4))
         if self.total_crawl % 10 == 0:
-            echo_info('downloadmiddleware','每10次停留2分钟')
-            time.sleep(10)
-        echo_info('downloadmiddleware', 'download->'+request.url)
+            print('downloadmiddleware 每10次停留2分钟')
+            time.sleep(5)
+        print('downloadmiddleware  download->'+request.url)
         self.driver.switch_to.window(self.driver.window_handles[1])             # 切换到最后一个handle
         page = self.get_url(request.url)
         if not page:
             self.close_driver()
-            raise IgnoreRequest('打开连接失败,proxy ip :{}'.format(self.now_ip))
+            raise IgnoreRequest('打开连接失败,proxy ip :{}'.format(self.current_ip))
         compress_data = CleanData(self.driver.page_source)                      # 获取压缩JS文件
 
         # 清洗数据
@@ -132,7 +125,7 @@ class Marketmiddleware(object):
         self.driver.switch_to.window(self.driver.window_handles[0])             # 切换会第二个handles
         stack_data = self.driver.execute_script(new_js)                      # 在源文件中执行JS
         json_str = json.dumps(stack_data)
-        echo_info('downloadmiddleware', 'download 成功')
+        print('downloadmiddleware download 成功')
         return HtmlResponse(body=json_str, encoding='utf-8', request=request,
                             url=str(self.url))
 
@@ -148,7 +141,7 @@ class Marketmiddleware(object):
 
 
     def get_url(self, url):
-        print('proxyip{}尝试打开地址:{}'.format(self.now_ip,url))
+        print('proxyip{}尝试打开地址:{}'.format(self.current_ip, url))
         try:
             self.driver.get(url)
             # WebDriverWait(self.driver, 10).until(presence_of_element_located((By.XPATH, '/html/head/title')))

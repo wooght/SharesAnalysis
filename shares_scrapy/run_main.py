@@ -7,6 +7,6 @@
 @Content    :
 """
 
-from main import get_ips
+from shares_scrapy.run.mount import get_ips
 result = get_ips.delay()
 print('id{}'.format(result.id))

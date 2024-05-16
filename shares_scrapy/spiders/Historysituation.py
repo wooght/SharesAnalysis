@@ -10,9 +10,11 @@ import scrapy
 from scrapy import Request
 from shares_scrapy.common.DateTimeMath import WDate
 from shares_scrapy.common.w_re import CleanData
-from shares_scrapy.model import shares_story, marketes_story, Wredis
+from shares_scrapy.run.GetProxy import GetProxy
+from shares_scrapy.model import shares_story, marketes_story
 from shares_scrapy.items import MarketItem
-import execjs,json
+import execjs, json
+
 
 class HistorysituationSpider(scrapy.Spider):
     name = "Historysituation"
@@ -23,6 +25,7 @@ class HistorysituationSpider(scrapy.Spider):
     with open(r'E:\wooght-server\scripy_wooght\shares_scrapy\shares_scrapy\wmiddlewares\js\xh5_s_klc_d.js') as f:
         js_code = f.read()
     xh5js = execjs.compile(js_code)
+    exists_code = GetProxy('exists_code')
 
     custom_settings = {
         'DOWNLOADER_MIDDLEWARES': {
@@ -36,12 +39,11 @@ class HistorysituationSpider(scrapy.Spider):
         all_shares = shares_story.all_shares()
         exists_market = marketes_story.group_code() if marketes_story.group_code() else []
         for share in all_shares:
-            if share.code in exists_market: continue
-            if Wredis.get(share.code): continue
-            Wredis.set(share.code, 'Historysituation')
-            yield Request(url=self.url_models.format(share=share.symbol, now_date=self.now_date), callback=self.parse, errback=self.err_parse,
-                          meta={'code':share.code, 'symbol':share.symbol, 'proxy_status': 1, 'id': share.id})
-
+            if share.code in exists_market: continue                # 已经存在数据库中
+            if self.exists_code.add_ip(share.code) > 0: continue    # 已经存在redis中
+            yield Request(url=self.url_models.format(share=share.symbol, now_date=self.now_date), callback=self.parse,
+                          errback=self.err_parse,
+                          meta={'code': share.code, 'symbol': share.symbol, 'proxy_status': 1, 'id': share.id})
 
     def parse(self, response, *args):
         item = MarketItem()
@@ -55,17 +57,16 @@ class HistorysituationSpider(scrapy.Spider):
         for row in result:
             if 'prevclose' in row.keys(): del row['prevclose']
             row['date'] = row['date'].split('T')[0]
-            markets.append({key:value for key,value in row.items()})
+            markets.append({key: value for key, value in row.items()})
         item['market'] = json.dumps(markets)
         item['share_id'] = response.meta['id']
         item['code'] = response.meta['code']
         yield item
 
-
-
     def err_parse(self, failure):
         print(failure.value.__class__.__name__)
         request = failure.request
-        yield Request(url=self.url_models.format(share=request.meta['symbol'], now_date=self.now_date), callback=self.parse, errback=self.err_parse,
-                          meta={'code':request.meta['code'], 'symbol':request.meta['symbol'],
-                                'proxy_status': 2, 'id': request.meta['id']})
+        yield Request(url=self.url_models.format(share=request.meta['symbol'], now_date=self.now_date),
+                      callback=self.parse, errback=self.err_parse,
+                      meta={'code': request.meta['code'], 'symbol': request.meta['symbol'],
+                            'proxy_status': 2, 'id': request.meta['id']})
