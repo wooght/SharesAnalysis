@@ -47,7 +47,6 @@ class MarketsituationSpider(scrapy.Spider):
         # all_shares = [share_obj2, shares_obj]
         exists_market = marketes_story.group_code() if marketes_story.group_code() else []
         # exists_market = []
-        print(exists_market)
         for share in all_shares:
             if share.code in exists_market: continue
             if self.exists_code.add_ip(share.code): continue

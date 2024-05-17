@@ -38,6 +38,11 @@ LOG_LEVEL = "INFO"
 LOG_ENABLED = True
 LOG_STDOUT = True
 
+# 关闭spider 的条件
+CLOSESPIDER_ITEMCOUNT = 0
+CLOSESPIDER_ERRORCOUNT = 0
+
+
 # Disable Telnet Console (enabled by default)
 #TELNETCONSOLE_ENABLED = False
 

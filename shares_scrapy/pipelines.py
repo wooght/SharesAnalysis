@@ -7,7 +7,7 @@
 @Content    :spider流程控制模块 管道功能, 数据处理
 """
 import json
-
+from twisted.internet import reactor
 from itemadapter import ItemAdapter
 from shares_scrapy.items import AreaItem, Csrcclassify, SharesItem, MarketItem, NewsItem
 from shares_scrapy.model import T, areas_story, csrcs_story, shares_story, news_story
@@ -73,7 +73,7 @@ class SharesScrapyPipeline:
             i = T.market.insert()
             r = T.connect.execute(i, insert_data)
             T.connect.commit()
-            echo_info('pipeline', str(item['code'])+': 保存'+str(len(insert_data))+'天数据')
+            print('pipeline'+str(item['code'])+': 保存'+str(len(insert_data))+'天数据')
         elif isinstance(item, NewsItem):
             """
                 新闻
@@ -85,6 +85,7 @@ class SharesScrapyPipeline:
         return item
 
     def close_spider(self, spider):
-        print('spider: '+spider.name + " stop ok")
+        print('SPIDER_CLOSED: '+spider.name + " closed")
         T.connect.commit()
+        reactor.stop()
         # T.connect.close()

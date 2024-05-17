@@ -29,13 +29,18 @@ class ProcessExtension:
         return cls(crawler)
 
     def spider_start(self, spider):
-        echo_info('extension', '{} star'.format(spider.name))
+        print('ProcessExtension: {} star'.format(spider.name))
 
     def spider_stop(self, spider):
-        echo_info('extension', '{} closed'.format(spider.name))
+        print('ProcessExtension: {} closed'.format(spider.name))
 
     def engine_start(self):
-        echo_info('extension', 'engine start')
+        print('ProcessExtension engine start')
 
     def engine_stop(self):
-        echo_info('extension', 'engine stop')
+        print('ProcessExtension engine stop')
+
+"""
+    和extension 相关的其他操作
+    [scrapy.extensions.logstats] INFO: Crawled 4 pages (at 4 pages/min), scraped 4 items (at 4 items/min)
+"""
