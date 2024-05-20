@@ -56,7 +56,26 @@ DEFAULT_REQUEST_HEADERS = {
    "User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 Edg/122.0.0.0",
    "Connection": "keep-alive",
 }
-#
+
+# scrapy -redis 配置
+# 替换调度器和去重为scrapy-redis
+SCHEDULER = "scrapy_redis.scheduler.Scheduler"              # 调度器
+DUPEFILTER_CLASS = "scrapy_redis.dupefilter.RFPDupeFilter"  # scrapy-redis的去重组件
+SCHEDULER_PERSIST = True                                    # 请求URL记录不丢弃, 断点续爬
+# 默认请求队列形式(按优先级)
+# SCHEDULER_QUEUE_CLASS = "scrapy_redis.queue.SpiderPriorityQueue"
+SCHEDULER_QUEUE_CLASS = "scrapy_redis.queue.SpiderQueue"   # 先进先出
+# SCHEDULER_QUEUE_CLASS = "scrapy_redis.queue.SpiderStack"   # 堆栈模式,先进后出
+
+REDIS_HOST = '192.168.101.103'
+REDIS_PORT = '6379'
+# REDIS_PARAMS = {
+#    'password': '123456' # redis有密码才设置此项
+# }
+# 配置持久化
+SCHEDULER_FLUSH_ON_START = True  # 是否每次启动清空去重列表
+
+
 
 # Enable or disable spider wmiddlewares
 # See https://docs.scrapy.org/en/latest/topics/spider-middleware.html

@@ -14,6 +14,7 @@ class ProxyMiddleware:
     proxy_ip = GetProxy('proxy_ips')
 
     def __init__(self, crawler):
+        print('ProxyMiddleware 加载成功')
         self.crawler = crawler
         self.current_ip = self.proxy_ip.get_ip()
 

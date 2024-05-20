@@ -14,16 +14,13 @@ from shares_scrapy.model import shares_story, marketes_story, Wredis
 from shares_scrapy.common.DateTimeMath import WDate
 from shares_scrapy.run.GetProxy import GetProxy
 from shares_scrapy.items import MarketItem
+from scrapy_redis.spiders import RedisSpider
 
-class OneShare:
-    id = 0
-    code = 0
-    symbol = 0
-
-class MarketsituationSpider(scrapy.Spider):
+class MarketsituationSpider(RedisSpider):
     name = "Marketsituation"
-    allowed_domains = ["sina.com.cn"]
-    start_urls = ["https://sina.com.cn"]
+    redis_key = 'market_urls'
+    # allowed_domains = ["sina.com.cn"]
+    # start_urls = ["https://sina.com.cn"]
     custom_settings = {
         'DOWNLOADER_MIDDLEWARES': {
             "shares_scrapy.middlewares.SharesScrapyDownloaderMiddleware": None,
@@ -34,26 +31,26 @@ class MarketsituationSpider(scrapy.Spider):
     now_date = WDate.now_date.replace('-', '_')
     exists_code = GetProxy('exists_code')
 
-    def start_requests(self):
-        # @returns requests 0 10
-        echo_info('start_request', '开始')
-        all_shares = shares_story.all_shares()
-        # shares_obj = OneShare()
-        # share_obj2 = OneShare()
-        # shares_obj.id = 5343
-        # shares_obj.code = '600588'
-        # shares_obj.symbol = 'sh600588'
-        # share_obj2.id, share_obj2.code, share_obj2.symbol = 5344, '600657', 'sh600657'
-        # all_shares = [share_obj2, shares_obj]
-        exists_market = marketes_story.group_code() if marketes_story.group_code() else []
-        # exists_market = []
-        for share in all_shares:
-            if share.code in exists_market: continue
-            if self.exists_code.add_ip(share.code): continue
-            yield Request(url=self.url_models.format(share=share.symbol, now_date=self.now_date),
-                          errback=self.parse_err,
-                          callback=self.parse,
-                          meta={'id': share.id, 'code': share.code, 'symbol': share.symbol, 'proxy_again': False})
+    # def start_requests(self):
+    #     # @returns requests 0 10
+    #     echo_info('start_request', '开始')
+    #     all_shares = shares_story.all_shares()
+    #     # shares_obj = OneShare()
+    #     # share_obj2 = OneShare()
+    #     # shares_obj.id = 5343
+    #     # shares_obj.code = '600588'
+    #     # shares_obj.symbol = 'sh600588'
+    #     # share_obj2.id, share_obj2.code, share_obj2.symbol = 5344, '600657', 'sh600657'
+    #     # all_shares = [share_obj2, shares_obj]
+    #     exists_market = marketes_story.group_code() if marketes_story.group_code() else []
+    #     # exists_market = []
+    #     for share in all_shares:
+    #         if share.code in exists_market: continue
+    #         if self.exists_code.add_ip(share.code): continue
+    #         yield Request(url=self.url_models.format(share=share.symbol, now_date=self.now_date),
+    #                       errback=self.parse_err,
+    #                       callback=self.parse,
+    #                       meta={'id': share.id, 'code': share.code, 'symbol': share.symbol, 'proxy_again': False})
 
     def parse(self, response, *args, **kwargs):
         item = MarketItem()
@@ -77,4 +74,4 @@ class MarketsituationSpider(scrapy.Spider):
         request = failure.request
         meta = {'symbol': request.meta['symbol'], 'id': request.meta['id'], 'code': request.meta['code'],
                 'proxy_again': True}
-        yield Request(url=request.url, callback=self.parse, errback=self.parse_err, meta=meta)
+        yield Request(url=request.url, callback=self.parse, errback=self.parse_err, meta=meta, dont_filter=True)
