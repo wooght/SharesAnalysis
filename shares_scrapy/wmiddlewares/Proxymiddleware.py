@@ -6,9 +6,12 @@
 @Date       :2024/5/14 11:56
 @Content    :代理中间件
 """
+import time
+
 from scrapy.exceptions import IgnoreRequest
-from shares_scrapy.model import proxy_sitory
+from scrapy.utils.project import get_project_settings
 from shares_scrapy.run.GetProxy import GetProxy
+import random
 
 class ProxyMiddleware:
     proxy_ip = GetProxy('proxy_ips')
@@ -17,6 +20,7 @@ class ProxyMiddleware:
         print('ProxyMiddleware 加载成功')
         self.crawler = crawler
         self.current_ip = self.proxy_ip.get_ip()
+        self.delay = get_project_settings().get('RANDOM_DELAY')
 
     @classmethod
     def from_crawler(cls, crawler):
@@ -34,6 +38,7 @@ class ProxyMiddleware:
         if len(self.current_ip) == 0: raise IgnoreRequest('无代理IP可选')
         request.meta['proxy'] = 'http://{}'.format(self.current_ip)
         print('代理访问{},IP:{}'.format(request.url, self.current_ip))
+        time.sleep(random.randint(0, self.delay))
 
     def process_exception(self, request, exception, spider):
         """

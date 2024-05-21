@@ -23,7 +23,7 @@ class HistorysituationSpider(RedisSpider):
     redis_key = 'market_urls'
     # allowed_domains = ["sina.com.cn"]
     # start_urls = ["https://sina.com.cn"]
-    url_models = 'https://finance.sina.com.cn/realstock/company/{share}/hisdata_klc2/klc_kl.js?d={now_date}'
+    url_model = 'https://finance.sina.com.cn/realstock/company/{share}/hisdata_klc2/klc_kl.js?d={now_date}'
     now_date = WDate.now_date.replace('-', '_')
     with open(r'E:\wooght-server\scripy_wooght\shares_scrapy\shares_scrapy\wmiddlewares\js\xh5_s_klc_d.js') as f:
         js_code = f.read()
@@ -43,24 +43,33 @@ class HistorysituationSpider(RedisSpider):
         self.production = production
 
     def start_requests(self):
-        # 生产者模式, 添加要爬取的地址到redis
+        """
+        重写start_request
+        :return: None
+        :content: 判断是否生产环境  -> production -> push task queue
+                                 -> consume -> super().next_requests()
+        """
+        # 生产环境, 添加要爬取的地址到redis
         if self.production:
+            # 数据库去重
             all_shares = shares_story.all_shares()
             exists_market = marketes_story.group_code() if marketes_story.group_code() else []
             for share in all_shares:
-                if share.code in exists_market: continue  # 已经存在数据库中
+                if share.code in exists_market: continue        # 已经存在数据库中
                 sadd_nums = self.exists_code.add_ip(share.code)
-                if sadd_nums == 0: continue  # 已经存在redis中
+                if sadd_nums == 0: continue                     # 已经存在redis中
                 meta_info = {
                     'code': share.code,
                     'symbol': share.symbol,
                     'proxy_status': 1,
                     'id': share.id
                 }
-                url = self.url_models.format(share=share.symbol, now_date=self.now_date)
+                # push 任务队列(task queue) json数据类型要求
+                url = self.url_model.format(share=share.symbol, now_date=self.now_date)
                 request_json = json.dumps({'url': url, 'meta':meta_info, 'method': 'GET'})
                 self.server.lpush(self.redis_key, request_json)
                 print('共{}个request, 本次push request url {}'.format(self.server.scard, url))
+        # 消费环境
         else:
             return self.next_requests()
 
@@ -89,8 +98,13 @@ class HistorysituationSpider(RedisSpider):
         metadata = parameter.pop("meta") if "meta" in parameter else {}
         return FormRequest(url, dont_filter=True, method=method, formdata=parameter, meta=metadata, errback=self.err_parse)
 
-
     def parse(self, response, *args):
+        """
+        处理response
+        :param response:
+        :param args:
+        :return: MarketItem [share_id->int, code->string, market->list]
+        """
         item = MarketItem()
         print('成功到parse')
         compress_data = CleanData(response.body.decode('utf-8'))
@@ -109,9 +123,14 @@ class HistorysituationSpider(RedisSpider):
         yield item
 
     def err_parse(self, failure):
+        """
+        问题response处理
+        :param failure:
+        :return: Request dont_filter再次请求
+        """
         print(failure.value.__class__.__name__)
         request = failure.request
-        yield Request(url=self.url_models.format(share=request.meta['symbol'], now_date=self.now_date),
+        yield Request(url=self.url_model.format(share=request.meta['symbol'], now_date=self.now_date),
                       callback=self.parse, errback=self.err_parse, dont_filter=True,
                       meta={'code': request.meta['code'], 'symbol': request.meta['symbol'],
                             'proxy_status': 2, 'id': request.meta['id']})

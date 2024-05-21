@@ -17,11 +17,11 @@ NEWSPIDER_MODULE = "shares_scrapy.spiders"
 ROBOTSTXT_OBEY = False
 
 # 系统并发量
-CONCURRENT_REQUESTS = 32
+CONCURRENT_REQUESTS = 32      # start_requests 一次性会提交32个request给引擎
 # 同一网站延迟时间
-DOWNLOAD_DELAY = 3
+DOWNLOAD_DELAY = 2
 # 自定义随机等待最大时间
-RANDOM_DELAY = 5
+RANDOM_DELAY = 4
 # 同个域并发量
 CONCURRENT_REQUESTS_PER_DOMAIN = 1      # 设置为1 可以理解为顺序进行
 # 同IP并发量
@@ -74,6 +74,7 @@ REDIS_PORT = '6379'
 # }
 # 配置持久化
 SCHEDULER_FLUSH_ON_START = True  # 是否每次启动清空去重列表
+REDIS_START_URLS_BATCH_SIZE = 16 # redis每批次执行request数量
 
 
 
