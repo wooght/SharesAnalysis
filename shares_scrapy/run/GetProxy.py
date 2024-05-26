@@ -40,6 +40,7 @@ class GetProxy:
         if self.r.scard(self.name) < 2:
             get_ips.delay()
         ip = self.r.srandmember(self.name, 1)
+        # ip = self.r.spop(self.name)
         if len(ip) > 0:
             self.del_ip(ip[0])  # 取出后删除
             return ip[0].decode('utf-8')

@@ -108,6 +108,22 @@ class DateTimeMath:
         """
         return time.strftime(self.time_model, time.localtime())
 
+    def before_day(self, days=30):
+        """
+        得到给定days前的日期和时间戳
+        Parameters
+        ----------
+        days 默认30天
+        Returns [date,stamp]
+        -------
+        """
+        before_stamp = self.time_stamp - 24 * 3600 * days
+        before_datetime = self.stamp_to_str(before_stamp)
+        date = before_datetime.split(' ')[0]
+        date_stamp = self.str_to_stamp(before_datetime)
+        return [date, int(date_stamp)]
+
+
 
 WDate = DateTimeMath()
 if __name__ == "__main__":
@@ -128,3 +144,4 @@ if __name__ == "__main__":
     print("下一天是:", date_list.__next__())
     print('2022-10-7是星期几:', WDate.get_day('2022-10-10').tm_wday)
     print("共运行时间:", WDate.run_time())
+    print(WDate.before_day())

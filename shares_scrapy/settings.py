@@ -36,7 +36,7 @@ COOKIES_ENABLED = True
 # 日志级别  ERROR/WARNING/CRITICAL/DEBUG
 LOG_LEVEL = "INFO"
 LOG_ENABLED = True
-LOG_STDOUT = True
+LOG_STDOUT = False   # True 可能会导致scrapyd显示问题
 
 # 关闭spider 的条件
 CLOSESPIDER_ITEMCOUNT = 0
@@ -59,16 +59,16 @@ DEFAULT_REQUEST_HEADERS = {
 
 # scrapy -redis 配置
 # 替换调度器和去重为scrapy-redis
-SCHEDULER = "scrapy_redis.scheduler.Scheduler"              # 调度器
-DUPEFILTER_CLASS = "scrapy_redis.dupefilter.RFPDupeFilter"  # scrapy-redis的去重组件
-SCHEDULER_PERSIST = True                                    # 请求URL记录不丢弃, 断点续爬
-# 默认请求队列形式(按优先级)
+# SCHEDULER = "scrapy_redis.scheduler.Scheduler"              # 调度器
+# DUPEFILTER_CLASS = "scrapy_redis.dupefilter.RFPDupeFilter"  # scrapy-redis的去重组件
+# SCHEDULER_PERSIST = True                                    # 请求URL记录不丢弃, 断点续爬
+# # 默认请求队列形式(按优先级)
+# SCHEDULER_QUEUE_CLASS = "scrapy_redis.queue.SpiderQueue"   # 先进先出
 # SCHEDULER_QUEUE_CLASS = "scrapy_redis.queue.SpiderPriorityQueue"
-SCHEDULER_QUEUE_CLASS = "scrapy_redis.queue.SpiderQueue"   # 先进先出
 # SCHEDULER_QUEUE_CLASS = "scrapy_redis.queue.SpiderStack"   # 堆栈模式,先进后出
 
-REDIS_HOST = '192.168.101.103'
-REDIS_PORT = '6379'
+# REDIS_HOST = '192.168.101.103'
+# REDIS_PORT = '6379'
 # REDIS_PARAMS = {
 #    'password': '123456' # redis有密码才设置此项
 # }
