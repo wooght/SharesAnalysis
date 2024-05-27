@@ -17,6 +17,7 @@ class DateTimeMath:
     date_model = "%Y-%m-%d"  # 日期格式
     time_model = "%H:%M:%S"  # 时间格式
     time_tpl = time.strftime(datetime_model, time_struct)  # 当前输出时间
+    now_date = time.strftime(date_model, time_struct)  # 当前输出日期
 
     def __init__(self):
         self.now_date = time.strftime(self.date_model, self.time_struct)
