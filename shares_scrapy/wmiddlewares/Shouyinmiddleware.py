@@ -15,18 +15,67 @@ from shares_scrapy.common.w_re import CleanData
 from shares_scrapy.wmiddlewares.Webdrivermiddleware import WebdriverMiddleware
 
 class ShouyinMiddleWare(WebdriverMiddleware):
+    headers_text='''openid: 
+logintoken: Q1bvaqlU4hnvcnj0KPly8X15bZ3S5H9lA9H1PdzkUCra-XqUlZSQb65jp3e_8fsvfD5xms3dqDrOIG7i-jhCEQ
+poiid: 163134577
+Origin: https://retailadmin-erp.meituan.com
+Sec-Fetch-Dest: empty
+version: v1.0
+Sec-Fetch-Site: same-origin
+posbrand: MEITUAN
+platform: 3
+Connection: keep-alive
+sandbox: 
+appinfo: retail-admin
+Sec-Fetch-Mode: cors'''
     index_url = 'http://dpurl.cn/TAaQoHkz'
+    # index_url = 'http://www.linkbld.com'
     sy_user = 'wooght'
     sy_password = Wst.decryption('8kkz=YAii=2HV961V8p-7D[-l')
     sy_code = '7370902'
     clearn_data = CleanData('')
+    user_agent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 TitansX/11.11.15 KNB/1.0 iOS/17.4.1 App/(null)/1.18.8 meituangroup/com.meituan.erp.retail.admin/1.18.8 meituangroup/1.18.8 WKWebView'
+    headerss = {
+        "Accept": "application/json, text/plain, */*",
+        "Accept-Encoding": "gzip, deflate, br",
+        "Accept-Language": "zh-CN,zh-Hans;q=0.9",
+        # "User-Agent": user_agent,
+
+        # "Content-Type": "application/json;charset=utf-8",
+        # "Content-Length": 288,
+
+        # "Origin": "https://retailadmin-erp.meituan.com",
+        # "Sec-Fetch-Mode": "cors",
+        # "Sec-Fetch-Dest": "empty",
+        # "Sec-Fetch-Site": "same-origin",
+        "Connection": "keep-alive",
+        "Host": "retailadmin-erp.meituan.com",
+
+        # Miscellaneous
+        "posbrand": "MEITUAN",
+        "poiid": 0,
+        "appinfo": "retail-admin",
+        "logintoken": '',
+        "version": "v1.0",
+        "platform": "3",
+        "Referer": "",
+        # "mtgsig":{"a1":"1.1", "a3":0}
+    }
+    headers = {}
+    headers_temp = headers_text.split('\n')
+    print(headers_temp)
+    for head in headers_temp:
+        head_list = head.split(':')
+        headers[head_list[0]] = head_list[1].strip()
+    print(headers)
 
     def __init__(self):
-        super().__init__(is_proxy=False, maxtime=6, cookie_name='meituan')
+        super().__init__(is_proxy=False, maxtime=20, cookie_name='meituan')
         self.headless = False
         self.set_option()
 
     def set_option(self):
+        self.options.add_argument("--user-agent={}".format(self.user_agent))  # user-agent
         super().set_option()
         if self.get_url(self.index_url):
             # 先打开网页才能设置cookie
@@ -55,27 +104,60 @@ class ShouyinMiddleWare(WebdriverMiddleware):
             time.sleep(5)
             self.driver.save_screenshot('common/pic/shouyinresult.png')
             print('登录成功' if '商品' in self.driver.page_source else '登录失败')
+
+            # self.driver.find_element(By.NAME, 'user').send_keys(self.sy_user)
+            # self.driver.find_element(By.NAME, 'password').send_keys(self.sy_password)
+            # self.delay(2)
+            # self.driver.find_element(By.TAG_NAME, 'button').click()
+            # self.delay(2)
+
             cookies = self.driver.get_cookies()
             self.save_cookies(cookies)
+
+
             # self.driver.switch_to.parent_frame()
             # self.new_window()
         else:
             raise IgnoreRequest('访问失败{}'.format(self.index_url))
 
     def process_request(self, request, spider):
-        print('访问spider:{}提供的URL:{}'.format(spider.name, request.url))
-        self.get_url(request.url)
-        self.delay(1)
-        self.set_cookies(self.cookies)
-        self.delay(1)
-        page = self.get_url(request.url)
-        self.delay(1)
-        if page:
-            self.clearn_data.result_string = self.driver.page_source
-            self.clearn_data.delete_html()
-            return HtmlResponse(body=self.clearn_data.result_string, encoding='utf-8', request=request, url=request.url)
+        if 'native' in request.meta.keys():
+            print('--->原始headers:')
+            print(request.headers)
+            self.headers['poiid'] = self.cookies['retail-poiid']
+            referer_model = "https://retailadmin-erp.meituan.com/report.html?bizlogintoken="
+            self.headers['Referer'] = referer_model + self.cookies['erp-bsid'] + "&poiId=" + self.cookies[
+                'retail-poiid'] + "&version=1.1.0&native_version=1.18.8&webview_launch={}&pos_brand=MEITUAN".format(str(int(time.time()*1000)))
+            self.headers['logintoken'] = self.cookies['token-for-cors']
+            for key, value in self.headers.items():
+                request.headers[key] = value
+            request.headers.setdefault("User-Agent", self.user_agent)
+            self.cookies['username'] = 'wooght'
+            self.cookies['cityid'] = 0
+            self.cookies['appId'] = 3
+            self.cookies['login_token'] = self.cookies['token-for-cors']
+            self.cookies['uuid'] = self.cookies['_lxsdk']
+            self.cookies['_utm_content'] = self.cookies['uuid']
+            self.cookies['retailadmin-app-native-version'] = '1.18.8'
+            self.cookies['retailadmin-app-version'] = '1.1.0'
+            request.cookies = self.cookies
+            print("设置后的headers")
+            print(request.headers)
+            return None
         else:
-            raise IgnoreRequest('访问失败{}'.format(request.url))
+            print('访问spider:{}提供的URL:{}'.format(spider.name, request.url))
+            self.get_url(request.url)
+            self.delay(1)
+            self.set_cookies(self.cookies)
+            self.delay(1)
+            page = self.get_url(request.url)
+            self.delay(1)
+            if page:
+                self.clearn_data.result_string = self.driver.page_source
+                self.clearn_data.delete_html()
+                return HtmlResponse(body=self.clearn_data.result_string, encoding='utf-8', request=request, url=request.url)
+            else:
+                raise IgnoreRequest('访问失败{}'.format(request.url))
 
 """
     uuid=df692c85f97183d2df89.1716806199.1.0.0;
