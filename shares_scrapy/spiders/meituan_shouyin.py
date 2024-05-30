@@ -28,6 +28,7 @@ class MeituanShouyinSpider(scrapy.Spider):
     }
     form_text = json.loads('{"startTime":"1716825600000","endTime":"1716903900000","orderIdMatch":"","paymentType":0,"payTypeName":"全部","payType":-1,"startDate":"2024/05/28 00:00","endDate":"2024/05/28 21:45","cashierId":0,"discountType":0,"orderType":0,"offset":0,"limit":10}')
     form_data = {key:str(value) for key, value in form_text.items()}
+
     def start_requests(self) -> Iterable[Request]:
         start_day = WDate.before_day(30)
         turnover_class_url = self.turnover_api_model.format(str(start_day[1]) + '000', str(int(WDate.time_stamp)) + '999')

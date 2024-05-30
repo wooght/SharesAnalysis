@@ -23,7 +23,7 @@ class WebdriverMiddleware(object):
         self.is_proxy = is_proxy  # 是否代理
         self.maxtime = maxtime  # timeout 最大时间
         self.cookie_name = cookie_name
-        if len(self.cookie_name):
+        if len(self.cookie_name) > 0:
             pool = redis.ConnectionPool(host='192.168.101.103', port=6379, db=0, socket_connect_timeout=2, decode_responses=True)
             self.r = redis.Redis(connection_pool=pool)
             self.cookies = self.r.hgetall(self.cookie_name)
