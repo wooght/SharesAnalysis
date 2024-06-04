@@ -44,7 +44,7 @@ class WebdriverMiddleware(object):
         self.options.add_argument('--hide-scrollbars')  # 隐藏滚动条
         self.options.add_argument("--lang=zh_CN.UTF-8")  # 编码
         self.options.add_argument("--no-sandbox")  # 禁止沙盒模式
-        self.options.add_argument('--blink-settings=imagesEnabled=false')  # 不加载图片
+        # self.options.add_argument('--blink-settings=imagesEnabled=false')  # 不加载图片
         self.options.add_argument('--log-level=0')  # 设置日志级别   INFO:0,WARNING:1,LOG_ERROR:2,LOG_FATAL:3
         self.options.add_argument('--appinfo=retail-admin')
         self.options.add_argument('--no-first-run')     # 禁止首次运行向导
@@ -141,8 +141,17 @@ class WebdriverMiddleware(object):
         # 当前新cookie
         self.cookies = cookie_temp
 
+    def get_headers(self):
+        """
+        JS获取当前WEB的headers
+        :return:
+        """
+        current_headers = self.driver.execute_script("return document.documentElement.outerHTML;")
+        return current_headers
+
     def delay(self, s):
         time.sleep(s)
+
 
 if __name__ == '__main__':
     web = WebdriverMiddleware()
@@ -155,8 +164,3 @@ if __name__ == '__main__':
     #     print(i.url)
     #     print(i.response.headers)
     # web.new_window()
-
-
-"""
-erp-bsid=ZZhASTJsbdfv_HKnGubGVt8KI_6af9YcVur7ZDz4gfHMXrh-Wse1WQtxrnCsoR-kaGKo2V_oTfbDLxST8z9rGA; retail-poiid=163134577; retailadmin-app-native-version=1.18.8; retailadmin-app-version=1.1.0; username=wooght; WEBDFPID=z936y4z9u3w25u1117282v2x0uwuyx2y810wwzu75xy9795840wz4z50-2007001390280-1691641389695QASWOMA868c0ee73ab28e1d0b03bc83148500062862; __mta=217291049.1678035125091.1716787256251.1716787276122.5629; _utm_content=0000000000000183F2B1959F4472B92BF813928B4498BA164619479778148387; cityid=0; dpid=; network=unknown; uuid=0000000000000183F2B1959F4472B92BF813928B4498BA164619479778148387; _lxsdk_s=18fb745f352-421-25c-90e%7C%7CNaN; appId=3; biz_acct_id=46999744; login_token=ZZhASTJsbdfv_HKnGubGVt8KI_6af9YcVur7ZDz4gfHMXrh-Wse1WQtxrnCsoR-kaGKo2V_oTfbDLxST8z9rGA; pos_brand=MEITUAN; token-for-cors=ZZhASTJsbdfv_HKnGubGVt8KI_6af9YcVur7ZDz4gfHMXrh-Wse1WQtxrnCsoR-kaGKo2V_oTfbDLxST8z9rGA; _lxsdk=0000000000000183F2B1959F4472B92BF813928B4498BA164619479778148387; _lxsdk_cuid=186b2b00354c8-0ca39813e3bcf4-693b7b53-505c8-186b2b00354c8; _lxsdk_unoinid=183f2b1959f4472b92bf813928b4498ba164619479778148387
-"""
