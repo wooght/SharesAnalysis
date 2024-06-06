@@ -33,3 +33,10 @@ class Proxy89ipSpider(scrapy.Spider):
         # del tmp_list2[0]
         if len(ips_list) > 0: print('共获取{}条IP'.format(self.proxy_ip.add_ip(ips_list)))
         else: print('获取IP失败')
+
+"""
+    白名单接口:
+    https://wapi.proxy.linkudp.com/api/save_white?neek=2660780&appkey=aab53e578b4231dde138bb7214301f21&white=您的ip
+    获取本机IP地址:
+    http://httpbin.org/ip
+"""

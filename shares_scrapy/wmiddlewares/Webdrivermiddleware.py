@@ -46,11 +46,11 @@ class WebdriverMiddleware(object):
         self.options.add_argument("--no-sandbox")  # 禁止沙盒模式
         # self.options.add_argument('--blink-settings=imagesEnabled=false')  # 不加载图片
         self.options.add_argument('--log-level=0')  # 设置日志级别   INFO:0,WARNING:1,LOG_ERROR:2,LOG_FATAL:3
-        self.options.add_argument('--appinfo=retail-admin')
+        # self.options.add_argument('--appinfo=retail-admin')
         self.options.add_argument('--no-first-run')     # 禁止首次运行向导
-        self.options.add_argument(f'--header=Sec-Fetch-Mode:cors')
-        self.options.add_argument(f'--header=appinfo:retail-admin')
-        self.options.add_argument(f'--header=Sec-Fetch-Dest:empty')
+        # self.options.add_argument(f'--header=Sec-Fetch-Mode:cors')
+        # self.options.add_argument(f'--header=appinfo:retail-admin')
+        # self.options.add_argument(f'--header=Sec-Fetch-Dest:empty')
         prefs = {
             'profile.default_content_settings.popups': 0,  # 禁止弹出下载窗口
             'download.default_directory': 'downfile',  # 下载目录

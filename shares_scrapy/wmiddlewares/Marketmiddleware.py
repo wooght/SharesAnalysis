@@ -8,14 +8,14 @@
 """
 from scrapy.http import HtmlResponse
 from scrapy.exceptions import IgnoreRequest
+
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
-import time, sys
-from shares_scrapy.common.echo import echo, echo_info
+
+import time, sys, json, random
+from shares_scrapy.common.echo import echo
 from shares_scrapy.common.w_re import CleanData
-import json
-import random
 from shares_scrapy.run.GetProxy import GetProxy
 
 class Marketmiddleware(object):
@@ -151,6 +151,8 @@ class Marketmiddleware(object):
             print(f'.....错误{type(e).__name__}....')
             print(e)
             return False
+
+
 """
     WebDriverException :Message: unknown error: net::ERR_TUNNEL_CONNECTION_FAILED
     TimeoutException
