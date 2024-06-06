@@ -48,10 +48,13 @@ from multiprocessing import Process
 def crawl(s):
     execute(['scrapy', 'crawl', s])
 spider_list = ['Historysituation', 'Marketsituation']
+
 if __name__ == '__main__':
     spider_pool = []
     for spider in spider_list:
+        # 一个Spider一个进程
         spider_pool.append(Process(target=crawl, args=(spider,)))
         spider_pool[-1].start()
     for spider in spider_pool:
+        # 等待子进程结束
         spider.join()

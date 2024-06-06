@@ -6,7 +6,6 @@
 @Date       :2024/4/25 20:42
 @Content    :历史行情爬取 代理,不用webdriver
 """
-import scrapy
 from scrapy import Request, FormRequest
 from shares_scrapy.common.DateTimeMath import WDate
 from shares_scrapy.common.w_re import CleanData
@@ -21,10 +20,9 @@ from scrapy_redis.utils import bytes_to_str, is_dict
 class HistorysituationSpider(RedisSpider):
     name = "Historysituation"
     redis_key = 'market_urls'
-    # allowed_domains = ["sina.com.cn"]
-    # start_urls = ["https://sina.com.cn"]
     url_model = 'https://finance.sina.com.cn/realstock/company/{share}/hisdata_klc2/klc_kl.js?d={now_date}'
     now_date = WDate.now_date.replace('-', '_')
+    # 加载JS文件,为后期数据解密做准备
     with open(r'E:\wooght-server\scripy_wooght\shares_scrapy\shares_scrapy\wmiddlewares\js\xh5_s_klc_d.js') as f:
         js_code = f.read()
     xh5js = execjs.compile(js_code)
@@ -111,6 +109,7 @@ class HistorysituationSpider(RedisSpider):
         compress_data.delete_html()
         compress_data.to_compress()
         just_data = compress_data.result_string.split('"')[1]
+        # 调用JS的xh5_S_KLC_D 函数,将just_data作为参数
         result = self.xh5js.call('xh5_S_KLC_D', just_data)
         markets = []
         for row in result:

@@ -4,7 +4,7 @@
 @file       :Marketsituation.py
 @Author     :wooght
 @Date       :2024/4/25 20:42
-@Content    :获取历史行情日K
+@Content    :RedisSpider 实现分布式获取历史行情日K
 """
 
 from scrapy import Request, FormRequest
@@ -17,10 +17,20 @@ from scrapy_redis.utils import bytes_to_str, is_dict
 import json
 
 class MarketsituationSpider(RedisSpider):
+    """
+    利用RedisSpider实现分布式:
+        结构:
+            production  生产者,task(request/url)的生产者, 去重判断
+            queue 任务队列(存放于Redis的task),承上启下,调度功能
+            consumer 消费者/执行者(spider) 执行新的request,爬虫功能
+            production(新request/url)-->queue(Redis)<--consumer向queue获取task进行crawl
+        consumer(Spider)端配置:
+            继承REDISSpider后,不再需要allowed_domains和start_urls
+            allowed_domains = ["sina.com.cn"]
+            start_urls = ["https://sina.com.cn"]
+    """
     name = "Marketsituation"
     redis_key = 'market_urls'
-    # allowed_domains = ["sina.com.cn"]
-    # start_urls = ["https://sina.com.cn"]
     custom_settings = {
         'DOWNLOADER_MIDDLEWARES': {
             "shares_scrapy.middlewares.SharesScrapyDownloaderMiddleware": None,
@@ -31,30 +41,9 @@ class MarketsituationSpider(RedisSpider):
     now_date = WDate.now_date.replace('-', '_')
     exists_code = GetProxy('exists_code')
 
-    # def start_requests(self):
-    #     # @returns requests 0 10
-    #     echo_info('start_request', '开始')
-    #     all_shares = shares_story.all_shares()
-    #     # shares_obj = OneShare()
-    #     # share_obj2 = OneShare()
-    #     # shares_obj.id = 5343
-    #     # shares_obj.code = '600588'
-    #     # shares_obj.symbol = 'sh600588'
-    #     # share_obj2.id, share_obj2.code, share_obj2.symbol = 5344, '600657', 'sh600657'
-    #     # all_shares = [share_obj2, shares_obj]
-    #     exists_market = marketes_story.group_code() if marketes_story.group_code() else []
-    #     # exists_market = []
-    #     for share in all_shares:
-    #         if share.code in exists_market: continue
-    #         if self.exists_code.add_ip(share.code): continue
-    #         yield Request(url=self.url_model.format(share=share.symbol, now_date=self.now_date),
-    #                       errback=self.parse_err,
-    #                       callback=self.parse,
-    #                       meta={'id': share.id, 'code': share.code, 'symbol': share.symbol, 'proxy_again': False})
-
     def make_request_from_data(self, data):
         """
-        重写make_request_form_data,
+        重写make_request_form_data,为request加上参数
         :param data: 任务队列(task queue)数据 json->[url->string,meta->dict]
         :return: FormRequest
         :content: 给request添加errback
@@ -106,3 +95,24 @@ class MarketsituationSpider(RedisSpider):
         meta = {'symbol': request.meta['symbol'], 'id': request.meta['id'], 'code': request.meta['code'],
                 'proxy_again': True}
         yield Request(url=request.url, callback=self.parse, errback=self.err_parse, meta=meta, dont_filter=True)
+
+    # def start_requests(self):
+    #     # @returns requests 0 10
+    #     echo_info('start_request', '开始')
+    #     all_shares = shares_story.all_shares()
+    #     # shares_obj = OneShare()
+    #     # share_obj2 = OneShare()
+    #     # shares_obj.id = 5343
+    #     # shares_obj.code = '600588'
+    #     # shares_obj.symbol = 'sh600588'
+    #     # share_obj2.id, share_obj2.code, share_obj2.symbol = 5344, '600657', 'sh600657'
+    #     # all_shares = [share_obj2, shares_obj]
+    #     exists_market = marketes_story.group_code() if marketes_story.group_code() else []
+    #     # exists_market = []
+    #     for share in all_shares:
+    #         if share.code in exists_market: continue
+    #         if self.exists_code.add_ip(share.code): continue
+    #         yield Request(url=self.url_model.format(share=share.symbol, now_date=self.now_date),
+    #                       errback=self.parse_err,
+    #                       callback=self.parse,
+    #                       meta={'id': share.id, 'code': share.code, 'symbol': share.symbol, 'proxy_again': False})
